@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "id": "/FibonacciSuccessResponse",
+  "title": "Fibonacci Calculator Success Response",
+  "required": ["success", "input", "result"],
+  "type": "object",
+  "properties": {
+    "input": {
+      "type": "integer",
+      "minimum": -78,
+      "maximum": 78
+    },
+    "result": {
+      "type": "integer",
+      "minimum": -8944394323791464,
+      "maximum": 8944394323791464
+    },
+    "success": {
+      "type": "boolean",
+      "const": true
+    }
+  }
+}

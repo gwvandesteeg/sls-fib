@@ -1,0 +1,31 @@
+{
+  "name": "sls-fib",
+  "version": "1.0.0",
+  "description": "Serverless Fibonacci calculator",
+  "main": "handler.js",
+  "scripts": {
+    "test:unittest": "nyc --clean=true mocha",
+    "test:serverless": "nyc --clean=false ./node_modules/.bin/serverless invoke test --path slstest -s dev",
+    "test:schemas": "find schema -type f -iname \"*.json\" -print0 | xargs --replace=schemafile -0 -r ajv test -s json-schema-draft-07 -d schemafile --valid",
+    "test:schemahints": "find schema -type f -iname \"*.json\" -print0 | xargs --replace=schemafile -0 -r jshint schemafile",
+    "start": "./node_modules/.bin/serverless offline -s dev",
+    "debug": "export SLS_DEBUG=* && node --debug ./node_modules/.bin/serverless offline -s dev",
+    "coverage": "npm run test:unittest && npm run test:serverless && nyc report --reporter=text --reporter=lcov"
+  },
+  "author": "Gerwin van de Steeg <gerwin@vandesteeg.co.nz>",
+  "license": "CC-BY-NC-SA-4.0",
+  "devDependencies": {
+    "ajv-cli": "^3.0.0",
+    "chai": "^4.2.0",
+    "chai-json-schema": "^1.5.0",
+    "jsonlint": "^1.6.3",
+    "mocha": "^5.2.0",
+    "nyc": "^13.1.0",
+    "serverless": "^1.35.1",
+    "serverless-mocha-plugin": "^1.9.1",
+    "serverless-offline": "^3.31.3"
+  },
+  "dependencies": {
+    "bignum": "^0.13.0"
+  }
+}
