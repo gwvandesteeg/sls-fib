@@ -26,6 +26,7 @@
     "serverless-offline": "^3.31.3"
   },
   "dependencies": {
-    "bignum": "^0.13.0"
+    "bignum": "^0.13.0",
+    "jsonschema": "^1.2.4"
   }
 }
