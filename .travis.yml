@@ -1,0 +1,29 @@
+language: node_js
+node_js:
+  - node_js
+cache: npm
+
+script:
+  - npm install -g serverless
+jobs:
+  include:
+    - stage: unit tests
+      name: "Unit Tests"
+      script: npm run test:unittest
+    - name: "Test Schemas Hints"
+      script: npm run test:schemahints
+    - name: "Test Schemas"
+      script: npm run test:schemas
+    - name: "Serverless Tests"
+      script: npm run test:serverless
+    - name: "Code coverage check"
+      script: npm run coverage
+    - stage: build
+      script: sls package
+    - stage: deploy to testing
+      script: sls deploy --stage testing --package .serverless
+    - stage: Test running in testing environment
+      name: "Test Fibonacci function"
+      script: sls invoke --function fibonacci --stage testing --data "$(cat slstest/fibonacci.event.json)"
+
+
