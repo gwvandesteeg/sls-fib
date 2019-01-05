@@ -7,20 +7,30 @@ var validator = new jsonschema.Validator();
 var schema = require('./schema/FibonacciRequest.json');
 
 module.exports.handler = (event, context, callback) => {
-
   var response;
 
-  //console.log(event);
+  console.log(event);
 
   try {
     // validate input with a JSON Schema
-    validator.validate(event, schema, {throwError: true});
-    var result = fib.fibonacci(event.number).toNumber();
+    validator.validate(event.queryStringParameters, schema, {throwError: true});
+    var number = event.queryStringParameters.number;
+    // extract parameter from schema here, because it'll get sent as a string instead of a number
+    if (typeof(number) === 'string') {
+      // if this fails we have an invalid input anyway
+      number = parseInt(number);
+    }
+
+    var result = fib.fibonacci(number).toNumber();
     response = {
       statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true
+      },
       body: JSON.stringify({
         success: true,
-        input: event.number,
+        input: number,
         result: result
       })
     };
@@ -29,8 +39,7 @@ module.exports.handler = (event, context, callback) => {
       statusCode: 400,
       body: JSON.stringify({
         success: false,
-        message: 'Invalid input parameter',
-        input: event.number
+        message: 'Invalid input parameter'
       })
     };
   } finally {

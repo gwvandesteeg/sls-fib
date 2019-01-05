@@ -20,6 +20,20 @@ service: sls-fib # NOTE: update this with your service name
 provider:
   name: aws
   runtime: nodejs8.10
+  endpointType: REGIONAL
+  apiGateway:
+    apiKeySourceType: HEADER
+  apiKeys:
+    - ${opt:stage}-api-key
+  usagePlan:
+    quota:
+      limit: 5000
+      offset: 2
+      period: MONTH
+    throttle:
+      burstLimit: 200
+      rateLimit: 100
+  region: ap-southeast-2
 
 # you can overwrite defaults here
 #  stage: dev
@@ -58,6 +72,9 @@ package:
     - json-schema-draft-07
     - .vscode/**
     - .jshintrc
+    - test/**
+    - slstest/**
+    - README.md
 #    - exclude-me.js
 #    - exclude-me-dir/**
 
@@ -65,7 +82,27 @@ functions:
   fibonacci:
     handler: fibonacci.handler
     events:
-      - http: GET fibonacci
+      - http:
+          path: fibonacci
+          method: get
+          private: true
+          request:
+            parameters:
+              querystrings:
+                number: true
+          cors: 
+            origin: '*'
+            headers:
+            - Content-Type
+            - X-Amz-Date
+            - Authorization
+            - X-Api-Key
+            - X-Amz-Security-Token
+            - X-Amz-User-Agent
+            - X-Request-Id
+            allowCredentials: false
+            cacheControl: 'max-age=600, s-maxage=600, proxy-revalidate'
+
   hello:
     handler: handler.hello
 

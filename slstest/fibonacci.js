@@ -13,6 +13,16 @@ var validator = new jsonschema.Validator();
 var valid_schema = require('../schema/FibonacciSuccessResponse.json');
 var invalid_schema = require('../schema/FibonacciErrorResponse.json');
 
+function json_template(number) {
+  return {
+    "headers": {
+    },
+    "queryStringParameters": {
+      "number": number
+    }
+  };
+}
+
 describe('fibonacci lambda tests', function () {
   // set a 5 second timeout on the entire suite
   this.timeout(5000);
@@ -26,13 +36,15 @@ describe('fibonacci lambda tests', function () {
     0, 1, 2, 3, 4, 5,
     valid_schema.properties.input.maximum,
     -1, -2, -3,
-    valid_schema.properties.input.minimum
+    valid_schema.properties.input.minimum,
+    "0","1", "-1"
   ];
   var expected_results = [
     0, 1, 1, 2, 3, 5,
     valid_schema.properties.result.maximum,
     -1, -1, -2,
-    valid_schema.properties.result.minimum
+    valid_schema.properties.result.minimum,
+    0, 1, -1
   ];
 
   var items = valid_inputs.map(function (input, index) {
@@ -43,9 +55,7 @@ describe('fibonacci lambda tests', function () {
     var exp_result = pair[1];
 
     it('test valid input ' + number, function () {
-      return wrapped.run({
-        "number": number
-      }).then((response) => {
+      return wrapped.run(json_template(number)).then((response) => {
         const msg = `number=${number}; expected_result=${exp_result}`;
         expect(response, msg).to.not.be.empty;
         expect(response.statusCode, msg).to.be.equal(200);
@@ -55,7 +65,9 @@ describe('fibonacci lambda tests', function () {
         expect(body).to.be.jsonSchema(valid_schema);
         expect(validator.validate(body, invalid_schema).valid, msg).to.be.false;
         // validate actual response content
-        expect(body.input, msg).to.equal(number);
+        if (typeof(number) === "string") {
+          expect(body.input, msg).to.equal(parseInt(number));
+        }
         expect(body.result, msg).to.equal(exp_result);
       });
     }).timeout(100);
@@ -63,9 +75,7 @@ describe('fibonacci lambda tests', function () {
   });
 
   it('test invalid inputs are handled correctly - string', function () {
-    return wrapped.run({
-      "number": "steve"
-    }).then((response) => {
+    return wrapped.run(json_template("steve")).then((response) => {
       expect(response).to.not.be.empty;
       expect(response.statusCode).to.be.equal(400);
       expect(response).to.have.property('body');
@@ -77,9 +87,9 @@ describe('fibonacci lambda tests', function () {
   });
 
   it('test invalid inputs are handled correctly - non-integer float', function () {
-    return wrapped.run({
-      "number": 1.1
-    }).then((response) => {
+    return wrapped.run(
+      json_template(1.1)
+    ).then((response) => {
       expect(response).to.not.be.empty;
       expect(response.statusCode).to.be.equal(400);
       expect(response).to.have.property('body');
@@ -91,9 +101,9 @@ describe('fibonacci lambda tests', function () {
   });
 
   it('test invalid inputs are handled correctly - object', function () {
-    return wrapped.run({
-      "number": {}
-    }).then((response) => {
+    return wrapped.run(
+      json_template({})
+    ).then((response) => {
       expect(response).to.not.be.empty;
       expect(response.statusCode).to.be.equal(400);
       expect(response).to.have.property('body');
@@ -105,9 +115,9 @@ describe('fibonacci lambda tests', function () {
   });
 
   it('test invalid inputs are handled correctly - list', function () {
-    return wrapped.run({
-      "number": []
-    }).then((response) => {
+    return wrapped.run(
+      json_template([])
+    ).then((response) => {
       expect(response).to.not.be.empty;
       expect(response.statusCode).to.be.equal(400);
       expect(response).to.have.property('body');
@@ -119,9 +129,9 @@ describe('fibonacci lambda tests', function () {
   });
 
   it('test invalid inputs are handled correctly - number too large', function () {
-    return wrapped.run({
-      "number": valid_schema.properties.input.maximum + 1,
-    }).then((response) => {
+    return wrapped.run(
+      json_template(valid_schema.properties.input.maximum +1)
+    ).then((response) => {
       expect(response).to.not.be.empty;
       expect(response.statusCode).to.be.equal(400);
       expect(response).to.have.property('body');

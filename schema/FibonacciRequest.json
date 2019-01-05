@@ -6,9 +6,11 @@
   "properties": {
     "number": {
       "description": "The nth fibonacci number to calculate",
-      "type": "integer",
+      "type": ["integer", "string"],
       "minimum": -78,
-      "maximum": 78
+      "maximum": 78,
+      "minLength": 1,
+      "maxLength": 3
     }
   },
   "required": ["number"]
