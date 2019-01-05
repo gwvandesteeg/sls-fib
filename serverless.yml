@@ -36,6 +36,8 @@ provider:
   region: ap-southeast-2
   tags:
     provider: "Provider specific tags"
+  stage: ${opt:stage, "dev"}
+  deploymentPrefix: serverless
 
 # you can overwrite defaults here
 #  stage: dev

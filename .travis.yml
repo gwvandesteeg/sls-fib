@@ -20,8 +20,6 @@ stages:
   - build
   - name: test deploy
     if: branch = master
-  - name: test test deploy
-    if: branch = master
 
 script:
   - npm install -g serverless
@@ -39,12 +37,8 @@ jobs:
     - name: "Code coverage check"
       script: npm run coverage
 
-    - stage: build
-      script: sls package
-
     - stage: test deploy
-      script: sls deploy --stage testing --package .serverless
-
-    - stage: test test deploy
-      name: "Test Fibonacci function"
-      script: sls invoke -f fibonacci -s testing -d "$(cat slstest/fibonacci.event.json)"
+      script:
+       - sls deploy --stage testing
+       - sls invoke -f fibonacci -s testing -d "$(cat slstest/fibonacci.event.json)"
+       - sls remove --stage testing
