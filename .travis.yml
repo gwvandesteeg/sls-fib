@@ -1,6 +1,27 @@
+---
 language: node_js
 node_js: "8.10"
 cache: npm
+
+# only run on hotfix/release/master/develop and feature/* branches
+# to stick to the git flow process
+# and allow a github pages site in case it gets added
+branches:
+  only:
+    - master
+    - develop
+    - hotfix/.*
+    - release/.*
+    - feature/.*
+    - gh-pages
+
+stages:
+  - unit tests
+  - build
+  - name: test deploy
+    if: branch = master
+  - name: test test deploy
+    if: branch = master
 
 script:
   - npm install -g serverless
@@ -17,12 +38,13 @@ jobs:
       script: npm run test:serverless
     - name: "Code coverage check"
       script: npm run coverage
+
     - stage: build
       script: sls package
-    - stage: deploy to testing
+
+    - stage: test deploy
       script: sls deploy --stage testing --package .serverless
-    - stage: Test running in testing environment
+
+    - stage: test test deploy
       name: "Test Fibonacci function"
-      script: sls invoke --function fibonacci --stage testing --data "$(cat slstest/fibonacci.event.json)"
-
-
+      script: sls invoke -f fibonacci -s testing -d "$(cat slstest/fibonacci.event.json)"
