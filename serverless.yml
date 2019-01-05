@@ -24,7 +24,7 @@ provider:
   apiGateway:
     apiKeySourceType: HEADER
   apiKeys:
-    - ${opt:stage}-api-key
+    - ${opt:stage, "dev"}-api-key
   usagePlan:
     quota:
       limit: 5000
@@ -34,6 +34,8 @@ provider:
       burstLimit: 200
       rateLimit: 100
   region: ap-southeast-2
+  tags:
+    provider: "Provider specific tags"
 
 # you can overwrite defaults here
 #  stage: dev
@@ -81,6 +83,11 @@ package:
 functions:
   fibonacci:
     handler: fibonacci.handler
+    name: ${self:provider.stage}-fibonacci-calculator
+    description: "Calculates the nth fibonacci number"
+    memorySize: 128
+    tags:
+      function: "Function specific tags"
     events:
       - http:
           path: fibonacci
